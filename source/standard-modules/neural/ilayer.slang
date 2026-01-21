@@ -17,11 +17,19 @@ public interface ILayer<T, InputVector, OutputVector, Storage, Activation>
     where OutputVector : IVector<T>
     where Activation : IActivation<T>
 {
-    /// Evaluate layer: y = f(x).
+    /// Forward evaluation: y = f(x).
+    /// Storage is passed as parameter to enable autodiff gradient routing.
+    /// Method-level generic `S` is required for `linearTransform` constraints.
+    /// @param storage Weight/bias storage (primal for forward, gradient for backward via autodiff).
     /// @param activationParam Activation-specific parameters.
     /// @param input Input vector.
-    [NoDiffThis, Differentiable]
-    public OutputVector eval(Activation.ParamType activationParam, InputVector input);
+    /// @return Output vector.
+    [Differentiable]
+    public OutputVector eval<S>(S storage, Activation.ParamType activationParam, InputVector input)
+        where S : IStorage<T>
+        where S.Differential : IStorage<T.Differential>
+        where S.Address == S.Differential.Address
+        where S.Address == Storage.Address;
 
     /// Number of scalar parameters consumed by the layer (for contiguous packing conventions).
     public static const int ParameterCount;

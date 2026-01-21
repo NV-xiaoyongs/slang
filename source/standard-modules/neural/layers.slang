@@ -36,22 +36,22 @@ public struct FFLayer<
     public static const int ParameterCount =
         OutputVector.Size * InputVector.Size + (HasBias ? OutputVector.Size : 0);
 
-    internal Storage storage;
+    /// Addresses are stored as members (integers, not differentiable).
     internal Storage.Address weightAddress;
     internal Storage.Address biasAddress;
 
     /// Constructor for layers without bias.
-    public __init(Storage s, Storage.Address weightAddr)
+    /// @param weightAddr Address of weights in storage.
+    public __init(Storage.Address weightAddr)
     {
-        storage = s;
         weightAddress = weightAddr;
     }
 
     /// Constructor for layers with bias (separate addresses).
-    /// Weight and bias can be in different storage locations.
-    public __init(Storage s, Storage.Address weightAddr, Storage.Address biasAddr)
+    /// @param weightAddr Address of weights in storage.
+    /// @param biasAddr Address of bias in storage.
+    public __init(Storage.Address weightAddr, Storage.Address biasAddr)
     {
-        storage = s;
         weightAddress = weightAddr;
         biasAddress = biasAddr;
     }
@@ -61,21 +61,28 @@ public struct FFLayer<
         return Storage.getOffset(baseAddress, ParameterCount);
     }
 
-    /// Evaluate layer: y = Activation(W*x + b).
+    /// Forward evaluation: y = Activation(W*x + b).
+    /// Storage is passed as parameter to enable autodiff gradient routing.
+    /// @param storage Weight/bias storage (primal for forward, gradient for backward via autodiff).
     /// @param activationParam Activation-specific parameters (e.g., alpha for LeakyReLU).
     /// @param input Input vector.
-    [NoDiffThis, Differentiable]
-    public OutputVector eval(Activation.ParamType activationParam, InputVector input)
+    /// @return Output vector after linear transform and activation.
+    [Differentiable]
+    public OutputVector eval<S>(S storage, Activation.ParamType activationParam, InputVector input)
+        where S : IStorage<T>
+        where S.Differential : IStorage<T.Differential>
+        where S.Address == S.Differential.Address
+        where S.Address == Storage.Address
     {
         OutputVector y;
         if(HasBias)
         {
-            y = input.linearTransform<Storage, LinearLayout, OutputVector>(
+            y = input.linearTransform<S, LinearLayout, OutputVector>(
                 storage, storage, weightAddress, biasAddress);
         }
         else
         {
-            y = input.linearTransform<Storage, LinearLayout, OutputVector>(
+            y = input.linearTransform<S, LinearLayout, OutputVector>(
                 storage, weightAddress);
         }
         return Activation.eval<OutputVector>(activationParam, y);

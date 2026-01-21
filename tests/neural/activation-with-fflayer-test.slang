@@ -43,12 +43,12 @@ bool testFFLayerReLU()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, ReLU<float>, true>;
-    let layer = Layer(storage, 0, 4);  // weights at 0, bias at 4
+    let layer = Layer(0, 4);  // weights at 0, bias at 4
     
     float[2] arr = {-1.0, 2.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(NoParam(), x);
+    let y = layer.eval<Storage>(storage, NoParam(), x);
     
     // ReLU([-1, 2]) = [0, 2]
     return approxEqual(y[0], 0.0) && approxEqual(y[1], 2.0);
@@ -62,12 +62,12 @@ bool testFFLayerLeakyReLU()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, LeakyReLU<float>, true>;
-    let layer = Layer(storage, 0, 4);
+    let layer = Layer(0, 4);
     
     float[2] arr = {-1.0, 2.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(0.1, x);  // alpha = 0.1
+    let y = layer.eval<Storage>(storage, 0.1, x);  // alpha = 0.1
     
     // LeakyReLU([-1, 2], 0.1) = [-0.1, 2]
     return approxEqual(y[0], -0.1) && approxEqual(y[1], 2.0);
@@ -81,12 +81,12 @@ bool testFFLayerSigmoid()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, Sigmoid<float>, true>;
-    let layer = Layer(storage, 0, 4);
+    let layer = Layer(0, 4);
     
     float[2] arr = {0.0, 0.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(NoParam(), x);
+    let y = layer.eval<Storage>(storage, NoParam(), x);
     
     // Sigmoid([0, 0]) = [0.5, 0.5]
     return approxEqual(y[0], 0.5) && approxEqual(y[1], 0.5);
@@ -100,12 +100,12 @@ bool testFFLayerTanh()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, TanhActivation<float>, true>;
-    let layer = Layer(storage, 0, 4);
+    let layer = Layer(0, 4);
     
     float[2] arr = {0.0, 0.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(NoParam(), x);
+    let y = layer.eval<Storage>(storage, NoParam(), x);
     
     // Tanh([0, 0]) = [0, 0]
     return approxEqual(y[0], 0.0) && approxEqual(y[1], 0.0);
@@ -119,12 +119,12 @@ bool testFFLayerExp()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, ExpActivation<float>, true>;
-    let layer = Layer(storage, 0, 4);
+    let layer = Layer(0, 4);
     
     float[2] arr = {0.0, 0.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(NoParam(), x);
+    let y = layer.eval<Storage>(storage, NoParam(), x);
     
     // Exp([0, 0]) = [1, 1]
     return approxEqual(y[0], 1.0) && approxEqual(y[1], 1.0);
@@ -138,12 +138,12 @@ bool testFFLayerIdentity()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, IdentityActivation<float>, true>;
-    let layer = Layer(storage, 0, 4);
+    let layer = Layer(0, 4);
     
     float[2] arr = {-1.0, 2.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(NoParam(), x);
+    let y = layer.eval<Storage>(storage, NoParam(), x);
     
     // Identity([-1, 2]) = [-1, 2]
     return approxEqual(y[0], -1.0) && approxEqual(y[1], 2.0);
@@ -157,13 +157,13 @@ bool testFFLayerSine()
     let storage = Storage(params);
     
     typealias Layer = FFLayer<float, Vec2, Vec2, Storage, SineActivation<float>, true>;
-    let layer = Layer(storage, 0, 4);
+    let layer = Layer(0, 4);
     
     float pi = 3.14159265;
     float[2] arr = {0.0, pi / 2.0};
     let x = Vec2(arr);
     
-    let y = layer.eval(NoParam(), x);
+    let y = layer.eval<Storage>(storage, NoParam(), x);
     
     // Sin([0, pi/2]) = [0, 1]
     return approxEqual(y[0], 0.0, 0.001) && approxEqual(y[1], 1.0, 0.001);
