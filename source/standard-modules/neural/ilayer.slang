@@ -11,8 +11,6 @@ public interface ILayer<T, InputVector, OutputVector, Storage, Activation>
     where T : __BuiltinFloatingPointType
     where T == T.Differential
     where Storage : IStorage<T>
-    where Storage.Differential : IStorage<T.Differential>
-    where Storage.Address == Storage.Differential.Address
     where InputVector : IVector<T>
     where OutputVector : IVector<T>
     where Activation : IActivation<T>
